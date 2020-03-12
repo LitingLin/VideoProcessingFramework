@@ -18,6 +18,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TC)
 enable_language(CUDA)
+find_package(CUDA REQUIRED)
 add_subdirectory(TC_CORE)
 
 set(VIDEO_CODEC_SDK_DIR "" CACHE PATH "Path to Nvidia Video Codec SDK")
@@ -86,6 +87,7 @@ endif(UNIX)
 #Add TC_CORE & TC headers;
 include_directories(${TC_CORE_INC_PATH})
 include_directories(${TC_INC_PATH})
+include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 #Link against libraries;
 if(UNIX)
@@ -101,10 +103,15 @@ target_link_libraries(TC PUBLIC ${AVUTIL_LIBRARY})
 target_link_libraries(TC PUBLIC ${AVCODEC_LIBRARY})
 target_link_libraries(TC PUBLIC ${AVFORMAT_LIBRARY})
 target_link_libraries(TC PUBLIC ${SWRESAMPLE_LIBRARY})
-target_link_libraries(TC PUBLIC cudart)
-target_link_libraries(TC PUBLIC cuda)
-target_link_libraries(TC PUBLIC nppicc)
+target_link_libraries(TC PUBLIC ${CUDA_LIBRARIES})
+target_link_libraries(TC PUBLIC ${CUDA_nppicc_LIBRARY})
 target_link_libraries(TC PUBLIC TC_CORE)
+if (UNIX)
+    target_link_libraries(TC PUBLIC ${CUDA_TOOLKIT_ROOT_DIR}/lib/cuda.so)
+else()
+    target_link_libraries(TC PUBLIC ${CUDA_TOOLKIT_ROOT_DIR}/lib/x64/cuda.lib)
+endif()
+
 
 #Promote variables to parent & global scope;
 set (TC_CORE_INC_PATH             ${TC_CORE_INC_PATH}             PARENT_SCOPE)

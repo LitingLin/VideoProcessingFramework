@@ -42,22 +42,25 @@ include_directories(${VIDEO_CODEC_SDK_INCLUDE_DIR})
 #Set up python bindings;
 set(GENERATE_PYTHON_BINDINGS FALSE CACHE BOOL "Generate VPF Python bindings")
 if(GENERATE_PYTHON_BINDINGS)
-	find_package(PythonLibs 3.5 REQUIRED)
-	if(PYTHONLIBS_FOUND)
-		#Adding pybind11 stuff;
-		add_subdirectory(pybind11-2.1.1)
+    find_package (Python3 COMPONENTS Development)
+    enable_language(CUDA)
+    find_package(CUDA REQUIRED)
 
-		#Adding path to Python & pybind11 headers;
-		set(PYBIND_INDLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pybind11-2.1.1/include)
-		include_directories(${PYBIND_INDLUDE_DIR})
-		include_directories(${PYTHON_INCLUDE_DIR})
-		
-		#Add target;
-		pybind11_add_module(PyNvCodec SHARED ${PYNVCODEC_SOURCES} ${PYNVCODEC_HEADERS})
-		
-		#Link libs;
-		target_link_libraries(PyNvCodec PUBLIC TC_CORE TC ${PYTHON_LIBRARIES} ${NVCUVID_LIBRARY} ${NVENCODE_LIBRARY})
-	endif(PYTHONLIBS_FOUND)
+    #Adding pybind11 stuff;
+    add_subdirectory(pybind11-2.1.1)
+
+    #Adding path to Python & pybind11 headers;
+    set(PYBIND_INDLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pybind11-2.1.1/include)
+    include_directories(${PYBIND_INDLUDE_DIR})
+    include_directories(${PYTHON_INCLUDE_DIR})
+
+    #Add target;
+    pybind11_add_module(PyNvCodec SHARED ${PYNVCODEC_SOURCES} ${PYNVCODEC_HEADERS})
+
+    target_include_directories(PyNvCodec PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+    #Link libs;
+    target_link_libraries(PyNvCodec PUBLIC TC_CORE TC ${NVCUVID_LIBRARY} ${NVENCODE_LIBRARY} ${CUDA_LIBRARIES})
 endif(GENERATE_PYTHON_BINDINGS)
 
 
